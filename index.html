@@ -1,228 +1,1882 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Market FIFF</title>
-  <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: radial-gradient(circle at center, #0a0a0f, #000);
-      color: #fff;
-      font-family: "Orbitron", sans-serif;
-      overflow-x: hidden;
-      flex-direction: column;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aetheria Official — WhatsApp Bot Developer</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #020408;
+  --dark: #060b14;
+  --surface: #0a1020;
+  --surface2: #0f1828;
+  --purple: #a855f7;
+  --purple-bright: #c084fc;
+  --purple-neon: #d946ef;
+  --violet: #7c3aed;
+  --violet-dim: #4c1d95;
+  --blue-electric: #38bdf8;
+  --blue-glow: #0ea5e9;
+  --white: #f0f4ff;
+  --white-dim: #8b9cc0;
+  --grid-color: rgba(168,85,247,0.06);
+  --glow-purple: 0 0 20px rgba(168,85,247,0.5), 0 0 60px rgba(168,85,247,0.2);
+  --glow-blue: 0 0 20px rgba(56,189,248,0.5), 0 0 60px rgba(56,189,248,0.2);
+  --glow-pink: 0 0 20px rgba(217,70,239,0.5), 0 0 60px rgba(217,70,239,0.2);
+}
 
-    .container {
-      text-align: center;
-    }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    .typing {
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: transparent;
-      background: linear-gradient(90deg, #00f5ff, #00ff95, #0077ff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      white-space: pre-line;
-      border-right: 3px solid #00ffe0;
-      display: inline-block;
-      overflow: hidden;
-      animation: blinkCursor 0.8s infinite;
-    }
+html { scroll-behavior: smooth; }
 
-    @keyframes blinkCursor {
-      50% {
-        border-color: transparent;
-      }
-    }
+body {
+  font-family: 'Syne', sans-serif;
+  background-color: var(--black);
+  color: var(--white);
+  overflow-x: hidden;
+  cursor: none;
+}
 
-    .buttons {
-      margin-top: 30px;
-      display: none;
-      opacity: 0;
-    }
+/* CUSTOM CURSOR */
+.cursor {
+  width: 12px; height: 12px;
+  background: var(--purple-neon);
+  border-radius: 50%;
+  position: fixed;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.1s;
+  box-shadow: 0 0 15px var(--purple-neon), 0 0 30px var(--purple);
+  mix-blend-mode: screen;
+}
+.cursor-ring {
+  width: 36px; height: 36px;
+  border: 1px solid rgba(168,85,247,0.5);
+  border-radius: 50%;
+  position: fixed;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 9998;
+  transition: transform 0.15s ease, width 0.2s, height 0.2s;
+}
 
-    .btn {
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: #fff;
-      background: linear-gradient(90deg, #0077ff, #00f5ff);
-      border: none;
-      padding: 14px 40px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 15px #00eaff, 0 0 30px #0077ff inset;
-    }
+/* LOADING SCREEN */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: var(--black);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease, visibility 0.6s;
+}
+#loader.hidden { opacity: 0; visibility: hidden; }
+.loader-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--purple-bright);
+  letter-spacing: 0.3em;
+  text-shadow: var(--glow-purple);
+  animation: pulseGlow 1s ease-in-out infinite alternate;
+}
+.loader-bar {
+  width: 240px;
+  height: 2px;
+  background: var(--surface2);
+  border-radius: 99px;
+  margin-top: 2rem;
+  overflow: hidden;
+}
+.loader-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--violet), var(--purple-neon), var(--blue-electric));
+  border-radius: 99px;
+  animation: loadFill 1.8s ease-in-out forwards;
+  box-shadow: 0 0 12px var(--purple);
+}
+@keyframes loadFill { from { width: 0%; } to { width: 100%; } }
+.loader-pct {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--purple-bright);
+  margin-top: 0.75rem;
+  letter-spacing: 0.2em;
+}
 
-    .btn:hover {
-      transform: scale(1.08);
-      box-shadow: 0 0 25px #00ffe0, 0 0 50px #0077ff inset;
-    }
+/* CYBER GRID BACKGROUND */
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
 
-    .fade-in {
-      display: block !important;
-      animation: fadeIn 1.2s ease forwards;
-    }
+/* CANVAS PARTICLES */
+#particles-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+/* NAVBAR */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 1.2rem 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(6,11,20,0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(168,85,247,0.15);
+  transition: all 0.3s;
+}
+nav.scrolled {
+  background: rgba(6,11,20,0.85);
+  border-bottom-color: rgba(168,85,247,0.3);
+}
+.nav-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--white);
+  text-decoration: none;
+  letter-spacing: 0.1em;
+}
+.nav-logo span { color: var(--purple-bright); text-shadow: var(--glow-purple); }
+.nav-links { display: flex; gap: 2.5rem; list-style: none; align-items: center; }
+.nav-links a {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--white-dim);
+  text-decoration: none;
+  letter-spacing: 0.08em;
+  position: relative;
+  transition: color 0.3s;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 1px;
+  background: var(--purple-bright);
+  box-shadow: var(--glow-purple);
+  transition: width 0.3s;
+}
+.nav-links a:hover { color: var(--purple-bright); }
+.nav-links a:hover::after { width: 100%; }
+.nav-cta {
+  padding: 0.5rem 1.25rem;
+  background: linear-gradient(135deg, var(--violet), var(--purple-neon));
+  border-radius: 6px;
+  color: var(--white) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 15px rgba(168,85,247,0.4);
+  transition: box-shadow 0.3s, transform 0.2s !important;
+}
+.nav-cta:hover { box-shadow: var(--glow-purple) !important; transform: translateY(-1px); }
+.nav-cta::after { display: none !important; }
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+}
+.hamburger span {
+  width: 24px; height: 2px;
+  background: var(--purple-bright);
+  border-radius: 2px;
+  transition: all 0.3s;
+  box-shadow: 0 0 6px var(--purple);
+}
 
-    .channels {
-      margin-top: 25px;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      opacity: 0;
-      display: none;
-    }
+/* HERO SECTION */
+#home {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 4rem;
+  padding: 9rem 5% 5rem;
+  position: relative;
+  z-index: 1;
+}
+.hero-glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+}
+.orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(124,58,237,0.25) 0%, transparent 70%);
+  top: -100px; left: -100px;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.orb-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(56,189,248,0.15) 0%, transparent 70%);
+  bottom: 0; right: 10%;
+  animation: orbFloat 10s ease-in-out infinite reverse;
+}
+.orb-3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(217,70,239,0.2) 0%, transparent 70%);
+  top: 50%; right: 30%;
+  animation: orbFloat 12s ease-in-out infinite 2s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-40px) scale(1.05); }
+}
 
-    .channels a {
-      text-decoration: none;
-      color: #fff;
-      font-size: 1rem;
-      font-weight: bold;
-      padding: 10px 20px;
-      border-radius: 8px;
-      background: linear-gradient(90deg, #00f5ff, #0077ff);
-      box-shadow: 0 0 10px rgba(0,255,200,0.3);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+.hero-content { position: relative; z-index: 2; }
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  background: rgba(124,58,237,0.15);
+  border: 1px solid rgba(168,85,247,0.3);
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--purple-bright);
+  letter-spacing: 0.1em;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(10px);
+  animation: fadeSlideUp 0.8s ease forwards;
+}
+.hero-badge .dot {
+  width: 6px; height: 6px;
+  background: var(--purple-neon);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--purple-neon);
+  animation: blink 1.2s ease-in-out infinite;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    .channels a:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(0,255,200,0.6);
-    }
+.hero-title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  animation: fadeSlideUp 0.8s ease 0.1s forwards;
+  opacity: 0;
+}
+.hero-title .line1 {
+  display: block;
+  background: linear-gradient(135deg, var(--white) 0%, var(--purple-bright) 50%, var(--purple-neon) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 30px rgba(168,85,247,0.5));
+}
+.hero-title .line2 {
+  display: block;
+  color: var(--white);
+  text-shadow: 0 0 40px rgba(168,85,247,0.4);
+}
 
-    .channels.fade-in {
-      display: flex !important;
-      animation: fadeIn 1.2s ease forwards;
-    }
+.hero-subtitle-wrap {
+  font-size: 1rem;
+  color: var(--white-dim);
+  margin-bottom: 1rem;
+  min-height: 1.5em;
+  font-weight: 400;
+  animation: fadeSlideUp 0.8s ease 0.2s forwards;
+  opacity: 0;
+}
+.typing-text { color: var(--purple-bright); font-weight: 600; }
+.cursor-blink {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--purple-neon);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: blink 0.8s steps(1) infinite;
+  box-shadow: 0 0 6px var(--purple-neon);
+}
 
-    .products {
-      display: none;
-      opacity: 0;
-      margin-top: 40px;
-      max-width: 900px;
-      width: 100%;
-      padding: 20px;
-    }
+.hero-desc {
+  font-size: 0.95rem;
+  color: var(--white-dim);
+  line-height: 1.7;
+  max-width: 460px;
+  margin-bottom: 2.5rem;
+  animation: fadeSlideUp 0.8s ease 0.3s forwards;
+  opacity: 0;
+}
 
-    .products.show {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-      animation: fadeIn 1.5s ease forwards;
-    }
+.hero-btns {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  animation: fadeSlideUp 0.8s ease 0.4s forwards;
+  opacity: 0;
+}
+.btn-primary {
+  padding: 0.85rem 2rem;
+  background: linear-gradient(135deg, var(--violet) 0%, var(--purple-neon) 100%);
+  color: var(--white);
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 0 25px rgba(168,85,247,0.4), 0 4px 20px rgba(0,0,0,0.4);
+  transition: all 0.3s;
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--purple-neon) 0%, var(--blue-electric) 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 0 40px rgba(168,85,247,0.6), 0 8px 30px rgba(0,0,0,0.5); }
+.btn-primary:hover::before { opacity: 1; }
+.btn-primary span { position: relative; z-index: 1; }
 
-    .card {
-      background: rgba(255,255,255,0.05);
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 0 15px rgba(0,255,200,0.1);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+.btn-secondary {
+  padding: 0.85rem 2rem;
+  background: rgba(168,85,247,0.08);
+  color: var(--purple-bright);
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: 1px solid rgba(168,85,247,0.35);
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s;
+  letter-spacing: 0.05em;
+}
+.btn-secondary:hover {
+  background: rgba(168,85,247,0.15);
+  border-color: var(--purple-bright);
+  box-shadow: 0 0 25px rgba(168,85,247,0.3);
+  transform: translateY(-3px);
+}
 
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 0 25px rgba(0,255,200,0.3);
-    }
+/* HERO VISUAL */
+.hero-visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeSlideUp 1s ease 0.3s forwards;
+  opacity: 0;
+}
+.hologram-panel {
+  position: relative;
+  width: 380px;
+  height: 420px;
+}
+.holo-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(217,70,239,0.08), rgba(56,189,248,0.05));
+  border: 1px solid rgba(168,85,247,0.25);
+  border-radius: 24px;
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+}
+.holo-bg::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(168,85,247,0.08), transparent);
+  animation: hologramScan 4s linear infinite;
+}
+@keyframes hologramScan { to { left: 200%; } }
+.holo-corner {
+  position: absolute;
+  width: 20px; height: 20px;
+  border-color: var(--purple-bright);
+  border-style: solid;
+  opacity: 0.8;
+}
+.holo-corner.tl { top: 12px; left: 12px; border-width: 2px 0 0 2px; }
+.holo-corner.tr { top: 12px; right: 12px; border-width: 2px 2px 0 0; }
+.holo-corner.bl { bottom: 12px; left: 12px; border-width: 0 0 2px 2px; }
+.holo-corner.br { bottom: 12px; right: 12px; border-width: 0 2px 2px 0; }
 
-    .card h3 {
-      margin-bottom: 10px;
-      font-size: 1.2rem;
-      color: #00f5ff;
-    }
+.bot-icon-main {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -55%);
+  animation: floatY 4s ease-in-out infinite;
+}
+.wa-icon-large {
+  width: 100px; height: 100px;
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  border-radius: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 40px rgba(37,211,102,0.4), 0 0 80px rgba(37,211,102,0.15);
+  position: relative;
+  margin: 0 auto 1rem;
+  animation: pulseGlow 2s ease-in-out infinite alternate;
+}
+.wa-icon-large svg { width: 60px; height: 60px; fill: white; }
 
-    .card p, .card ul {
-      font-size: 0.9rem;
-      line-height: 1.4;
-    }
+.floating-icons {
+  position: absolute;
+  inset: 0;
+}
+.float-item {
+  position: absolute;
+  animation: floatOrbit 6s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+.float-item.wa2 {
+  width: 50px; height: 50px;
+  background: rgba(37,211,102,0.2);
+  border: 1px solid rgba(37,211,102,0.4);
+  top: 20%; right: 8%;
+  box-shadow: 0 0 20px rgba(37,211,102,0.3);
+  animation-delay: -1s;
+}
+.float-item.tg {
+  width: 50px; height: 50px;
+  background: rgba(41,182,246,0.2);
+  border: 1px solid rgba(41,182,246,0.4);
+  bottom: 28%; right: 5%;
+  box-shadow: 0 0 20px rgba(41,182,246,0.3);
+  animation-delay: -3s;
+}
+.float-item.ai {
+  width: 44px; height: 44px;
+  background: rgba(168,85,247,0.2);
+  border: 1px solid rgba(168,85,247,0.4);
+  top: 15%; left: 5%;
+  box-shadow: var(--glow-purple);
+  animation-delay: -2s;
+  font-size: 1.4rem;
+}
+.float-item.circuit {
+  width: 40px; height: 40px;
+  background: rgba(56,189,248,0.2);
+  border: 1px solid rgba(56,189,248,0.4);
+  bottom: 22%; left: 8%;
+  box-shadow: var(--glow-blue);
+  animation-delay: -4s;
+  font-size: 1.2rem;
+}
+.float-item.cube {
+  width: 38px; height: 38px;
+  background: rgba(217,70,239,0.2);
+  border: 1px solid rgba(217,70,239,0.4);
+  top: 50%; left: 3%;
+  box-shadow: var(--glow-pink);
+  animation-delay: -0.5s;
+  font-size: 1rem;
+}
 
-    .order-btn {
-      display: inline-block;
-      margin: 10px 5px 0 0;
-      padding: 8px 16px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: bold;
-      color: #fff;
-      background: linear-gradient(90deg, #00f5ff, #0077ff);
-      box-shadow: 0 0 10px rgba(0,255,200,0.3);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+@keyframes floatOrbit {
+  0%, 100% { transform: translateY(0) scale(1); }
+  33% { transform: translateY(-12px) scale(1.05); }
+  66% { transform: translateY(8px) scale(0.97); }
+}
+@keyframes floatY {
+  0%, 100% { transform: translate(-50%, -55%); }
+  50% { transform: translate(-50%, -60%); }
+}
 
-    .order-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(0,255,200,0.6);
-    }
-  </style>
+.holo-info {
+  position: absolute;
+  bottom: 24px;
+  left: 20px; right: 20px;
+  background: rgba(6,11,20,0.6);
+  border: 1px solid rgba(168,85,247,0.2);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.holo-info-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--white-dim);
+  letter-spacing: 0.1em;
+}
+.holo-info-val {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--purple-bright);
+  text-shadow: 0 0 10px var(--purple);
+}
+.status-dot {
+  width: 8px; height: 8px;
+  background: #25D366;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #25D366;
+  animation: blink 1s ease-in-out infinite;
+}
+.holo-title {
+  position: absolute;
+  top: 24px; left: 20px; right: 20px;
+  text-align: center;
+}
+.holo-title-text {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--purple-bright);
+  letter-spacing: 0.2em;
+  opacity: 0.8;
+}
+
+/* SECTIONS SHARED */
+section { position: relative; z-index: 1; }
+.section-header { text-align: center; margin-bottom: 4rem; }
+.section-tag {
+  display: inline-block;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  color: var(--purple-bright);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  padding: 0.3rem 1rem;
+  background: rgba(168,85,247,0.1);
+  border: 1px solid rgba(168,85,247,0.25);
+  border-radius: 99px;
+}
+.section-title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.15;
+  background: linear-gradient(135deg, var(--white) 0%, var(--purple-bright) 60%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 20px rgba(168,85,247,0.3));
+}
+.section-desc {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  color: var(--white-dim);
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+}
+
+/* STATS SECTION */
+#stats {
+  padding: 5rem 5%;
+  background: linear-gradient(180deg, transparent, rgba(124,58,237,0.04), transparent);
+  border-top: 1px solid rgba(168,85,247,0.08);
+  border-bottom: 1px solid rgba(168,85,247,0.08);
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.stat-card {
+  background: rgba(10,16,32,0.8);
+  border: 1px solid rgba(168,85,247,0.18);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  backdrop-filter: blur(15px);
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+  animation: fadeSlideUp 0.7s ease forwards;
+  opacity: 0;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--purple), var(--purple-neon), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.stat-card:hover {
+  border-color: rgba(168,85,247,0.4);
+  box-shadow: 0 0 30px rgba(168,85,247,0.15);
+  transform: translateY(-6px);
+}
+.stat-card:hover::before { opacity: 1; }
+.stat-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+.stat-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--purple-bright);
+  text-shadow: 0 0 20px rgba(168,85,247,0.5);
+  display: block;
+}
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--white-dim);
+  letter-spacing: 0.06em;
+  margin-top: 0.3rem;
+}
+
+/* SCRIPT BOT SECTION */
+#script-bot {
+  padding: 6rem 5%;
+}
+.scripts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.script-card {
+  background: rgba(10,16,32,0.85);
+  border: 1px solid rgba(168,85,247,0.2);
+  border-radius: 20px;
+  padding: 2rem;
+  backdrop-filter: blur(20px);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+  animation: fadeSlideUp 0.7s ease forwards;
+  opacity: 0;
+}
+.script-card::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 21px;
+  background: linear-gradient(135deg, var(--violet), var(--purple-neon), var(--blue-electric));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.script-card:hover {
+  transform: translateY(-12px);
+  border-color: rgba(168,85,247,0.5);
+  box-shadow:
+    0 0 0 1px rgba(168,85,247,0.3),
+    0 20px 60px rgba(0,0,0,0.5),
+    0 0 40px rgba(168,85,247,0.15);
+}
+.script-card.featured {
+  border-color: rgba(168,85,247,0.4);
+  box-shadow: 0 0 30px rgba(168,85,247,0.12);
+}
+.card-badge {
+  position: absolute;
+  top: 1.25rem; right: 1.25rem;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 99px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+.badge-hot {
+  background: rgba(239,68,68,0.2);
+  color: #f87171;
+  border: 1px solid rgba(239,68,68,0.3);
+}
+.badge-new {
+  background: rgba(56,189,248,0.2);
+  color: var(--blue-electric);
+  border: 1px solid rgba(56,189,248,0.3);
+}
+.badge-pro {
+  background: rgba(168,85,247,0.2);
+  color: var(--purple-bright);
+  border: 1px solid rgba(168,85,247,0.3);
+}
+
+.card-icon {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  margin-bottom: 1.25rem;
+}
+.icon-wa { background: rgba(37,211,102,0.15); border: 1px solid rgba(37,211,102,0.3); box-shadow: 0 0 20px rgba(37,211,102,0.15); }
+.icon-ai { background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); box-shadow: 0 0 20px rgba(168,85,247,0.15); }
+.icon-cyber { background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.3); box-shadow: 0 0 20px rgba(56,189,248,0.15); }
+
+.card-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.03em;
+}
+.card-desc {
+  font-size: 0.85rem;
+  color: var(--white-dim);
+  line-height: 1.65;
+  margin-bottom: 1.25rem;
+}
+.card-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--white-dim);
+}
+.feature-item::before {
+  content: '▶';
+  font-size: 0.5rem;
+  color: var(--purple-bright);
+  filter: drop-shadow(0 0 4px var(--purple));
+}
+.card-actions { display: flex; gap: 0.75rem; }
+.btn-preview {
+  flex: 1;
+  padding: 0.65rem;
+  background: rgba(168,85,247,0.1);
+  border: 1px solid rgba(168,85,247,0.3);
+  border-radius: 8px;
+  color: var(--purple-bright);
+  font-family: 'Syne', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: 0.05em;
+}
+.btn-preview:hover {
+  background: rgba(168,85,247,0.2);
+  box-shadow: 0 0 15px rgba(168,85,247,0.25);
+}
+.btn-buy {
+  flex: 1;
+  padding: 0.65rem;
+  background: linear-gradient(135deg, var(--violet), var(--purple-neon));
+  border: none;
+  border-radius: 8px;
+  color: var(--white);
+  font-family: 'Syne', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 15px rgba(168,85,247,0.3);
+}
+.btn-buy:hover {
+  box-shadow: 0 0 25px rgba(168,85,247,0.5);
+  transform: translateY(-2px);
+}
+.btn-download {
+  padding: 0.65rem 0.85rem;
+  background: rgba(56,189,248,0.1);
+  border: 1px solid rgba(56,189,248,0.3);
+  border-radius: 8px;
+  color: var(--blue-electric);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.btn-download:hover {
+  background: rgba(56,189,248,0.2);
+  box-shadow: 0 0 15px rgba(56,189,248,0.25);
+}
+
+/* CONTACT SECTION */
+#contact {
+  padding: 6rem 5%;
+  background: linear-gradient(180deg, transparent, rgba(124,58,237,0.04), transparent);
+}
+.contact-wrapper {
+  max-width: 700px;
+  margin: 0 auto;
+}
+.contact-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+.contact-card {
+  background: rgba(10,16,32,0.85);
+  border: 1px solid rgba(168,85,247,0.2);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  backdrop-filter: blur(20px);
+  transition: all 0.4s;
+  position: relative;
+  overflow: hidden;
+  animation: fadeSlideUp 0.7s ease forwards;
+  opacity: 0;
+}
+.contact-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(168,85,247,0.08), transparent 60%);
+  pointer-events: none;
+}
+.contact-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 0 40px rgba(168,85,247,0.2);
+  border-color: rgba(168,85,247,0.4);
+}
+.contact-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  display: block;
+  filter: drop-shadow(0 0 15px currentColor);
+  animation: pulseGlow 2s ease-in-out infinite alternate;
+}
+.contact-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.08em;
+}
+.contact-handle {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--purple-bright);
+  margin-bottom: 1.5rem;
+}
+.btn-contact-wa {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #128C7E, #25D366);
+  color: white;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-radius: 10px;
+  text-decoration: none;
+  box-shadow: 0 0 20px rgba(37,211,102,0.3);
+  transition: all 0.3s;
+  width: 100%;
+  justify-content: center;
+}
+.btn-contact-wa:hover { box-shadow: 0 0 35px rgba(37,211,102,0.5); transform: translateY(-2px); }
+.btn-contact-tg {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #0088cc, #29b6f6);
+  color: white;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-radius: 10px;
+  text-decoration: none;
+  box-shadow: 0 0 20px rgba(41,182,246,0.3);
+  transition: all 0.3s;
+  width: 100%;
+  justify-content: center;
+}
+.btn-contact-tg:hover { box-shadow: 0 0 35px rgba(41,182,246,0.5); transform: translateY(-2px); }
+
+/* ABOUT SECTION */
+#about {
+  padding: 6rem 5%;
+}
+.about-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+.about-text .section-tag { text-align: left; }
+.about-title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 900;
+  color: var(--white);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+.about-title span {
+  background: linear-gradient(135deg, var(--purple-bright), var(--purple-neon));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.about-desc {
+  font-size: 0.95rem;
+  color: var(--white-dim);
+  line-height: 1.8;
+  margin-bottom: 2rem;
+}
+.about-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.tag-item {
+  padding: 0.35rem 0.9rem;
+  background: rgba(168,85,247,0.1);
+  border: 1px solid rgba(168,85,247,0.25);
+  border-radius: 99px;
+  font-size: 0.75rem;
+  color: var(--purple-bright);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.about-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.about-box {
+  width: 220px; height: 220px;
+  position: relative;
+}
+.about-box-inner {
+  width: 100%; height: 100%;
+  background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(217,70,239,0.1));
+  border: 1px solid rgba(168,85,247,0.3);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.5rem;
+  backdrop-filter: blur(15px);
+  animation: floatY 5s ease-in-out infinite;
+  box-shadow: 0 0 60px rgba(168,85,247,0.1), inset 0 0 40px rgba(168,85,247,0.05);
+}
+.about-icon { font-size: 4rem; filter: drop-shadow(0 0 20px rgba(168,85,247,0.6)); }
+.about-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--purple-bright);
+  letter-spacing: 0.2em;
+  text-align: center;
+}
+
+/* FOOTER */
+footer {
+  padding: 3rem 5% 2rem;
+  background: rgba(6,11,20,0.8);
+  border-top: 1px solid rgba(168,85,247,0.1);
+  backdrop-filter: blur(20px);
+  position: relative;
+  z-index: 1;
+}
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+.footer-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: 0.1em;
+}
+.footer-logo span { color: var(--purple-bright); text-shadow: var(--glow-purple); }
+.footer-social { display: flex; gap: 1rem; }
+.social-btn {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  text-decoration: none;
+  border: 1px solid rgba(168,85,247,0.25);
+  background: rgba(168,85,247,0.08);
+  color: var(--purple-bright);
+  transition: all 0.3s;
+}
+.social-btn:hover {
+  background: rgba(168,85,247,0.2);
+  border-color: var(--purple-bright);
+  box-shadow: 0 0 20px rgba(168,85,247,0.3);
+  transform: translateY(-3px);
+}
+.footer-copy {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--white-dim);
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+.footer-copy span { color: var(--purple-bright); }
+
+/* ANIMATIONS */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulseGlow {
+  from { box-shadow: 0 0 15px rgba(168,85,247,0.3); }
+  to { box-shadow: 0 0 40px rgba(168,85,247,0.6), 0 0 80px rgba(168,85,247,0.2); }
+}
+
+/* SCROLL REVEAL */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* MOBILE MENU */
+.nav-mobile {
+  display: none;
+  position: fixed;
+  top: 70px; left: 0; right: 0;
+  background: rgba(6,11,20,0.97);
+  backdrop-filter: blur(30px);
+  border-bottom: 1px solid rgba(168,85,247,0.2);
+  padding: 1.5rem 5%;
+  z-index: 999;
+  flex-direction: column;
+  gap: 1rem;
+}
+.nav-mobile.open { display: flex; }
+.nav-mobile a {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--white-dim);
+  text-decoration: none;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(168,85,247,0.1);
+  transition: color 0.2s;
+}
+.nav-mobile a:hover { color: var(--purple-bright); }
+
+/* FREE NOTICE BANNER */
+.free-notice {
+  max-width: 860px;
+  margin: 0 auto 3rem;
+  padding: 0 5%;
+}
+.free-notice-inner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(217,70,239,0.08));
+  border: 1px solid rgba(168,85,247,0.3);
+  border-radius: 16px;
+  padding: 1.2rem 1.5rem;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 0 30px rgba(168,85,247,0.08);
+}
+.free-badge-icon { font-size: 2rem; flex-shrink: 0; }
+.free-notice-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 0.2rem;
+}
+.free-notice-sub { font-size: 0.8rem; color: var(--white-dim); }
+.free-pill {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 0.4rem 1.1rem;
+  background: linear-gradient(135deg, var(--violet), var(--purple-neon));
+  border-radius: 99px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.75rem;
+  font-weight: 900;
+  color: white;
+  letter-spacing: 0.15em;
+  box-shadow: 0 0 20px rgba(168,85,247,0.4);
+  animation: pulseGlow 1.5s ease-in-out infinite alternate;
+}
+.card-version {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.ver-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  background: rgba(168,85,247,0.15);
+  border: 1px solid rgba(168,85,247,0.3);
+  border-radius: 4px;
+  color: var(--purple-bright);
+}
+.ver-size { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--white-dim); }
+.ver-type {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  background: rgba(56,189,248,0.1);
+  border: 1px solid rgba(56,189,248,0.25);
+  border-radius: 4px;
+  color: var(--blue-electric);
+}
+.dl-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.75rem;
+  background: rgba(6,11,20,0.5);
+  border: 1px solid rgba(168,85,247,0.12);
+  border-radius: 8px;
+}
+.dl-count { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--white-dim); }
+.dl-host { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: #22c55e; display: flex; align-items: center; gap: 0.3rem; }
+.btn-dl-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  color: white;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 10px;
+  text-decoration: none;
+  box-shadow: 0 0 25px rgba(34,197,94,0.35), 0 4px 20px rgba(0,0,0,0.4);
+  transition: all 0.3s;
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+}
+.btn-dl-main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #22c55e, #4ade80);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.btn-dl-main:hover { transform: translateY(-3px); box-shadow: 0 0 40px rgba(34,197,94,0.55), 0 8px 30px rgba(0,0,0,0.5); }
+.btn-dl-main:hover::before { opacity: 1; }
+.btn-dl-main svg, .btn-dl-main span { position: relative; z-index: 1; }
+.btn-dl-pill {
+  position: relative; z-index: 1;
+  margin-left: auto;
+  padding: 0.2rem 0.55rem;
+  background: rgba(255,255,255,0.2);
+  border-radius: 99px;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.btn-dl-main.downloading { background: linear-gradient(135deg, #7c3aed, #a855f7) !important; box-shadow: 0 0 30px rgba(168,85,247,0.5) !important; pointer-events: none; }
+.btn-dl-main.done { background: linear-gradient(135deg, #0369a1, #38bdf8) !important; box-shadow: 0 0 30px rgba(56,189,248,0.5) !important; }
+.howto-wrap {
+  max-width: 900px;
+  margin: 3.5rem auto 0;
+  padding: 0 5%;
+}
+.howto-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  letter-spacing: 0.08em;
+}
+.howto-steps { display: flex; align-items: flex-start; justify-content: center; gap: 0.75rem; flex-wrap: wrap; }
+.howto-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 130px;
+  max-width: 180px;
+  background: rgba(10,16,32,0.7);
+  border: 1px solid rgba(168,85,247,0.15);
+  border-radius: 14px;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.howto-step:hover { border-color: rgba(168,85,247,0.35); box-shadow: 0 0 20px rgba(168,85,247,0.1); }
+.step-num {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet), var(--purple-neon));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem; font-weight: 900; color: white;
+  box-shadow: 0 0 15px rgba(168,85,247,0.4);
+  flex-shrink: 0;
+}
+.step-text { font-size: 0.78rem; color: var(--white-dim); line-height: 1.5; }
+.step-text strong { color: var(--white); }
+.howto-arrow { color: var(--purple-bright); font-size: 1.2rem; margin-top: 2rem; opacity: 0.6; flex-shrink: 0; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  #home { grid-template-columns: 1fr; text-align: center; gap: 3rem; padding-top: 8rem; }
+  .hero-btns { justify-content: center; }
+  .hero-desc { margin-left: auto; margin-right: auto; }
+  .hero-visual { order: -1; }
+  .hologram-panel { width: 300px; height: 340px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .about-inner { grid-template-columns: 1fr; text-align: center; gap: 2rem; }
+  .about-tags { justify-content: center; }
+  .about-visual { order: -1; }
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+  .contact-cards { grid-template-columns: 1fr; max-width: 360px; margin-left: auto; margin-right: auto; }
+}
+@media (max-width: 500px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .scripts-grid { grid-template-columns: 1fr; }
+  .hologram-panel { width: 260px; height: 300px; }
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="typing" id="typing"></div>
-    <div class="buttons" id="buttons">
-      <button class="btn" id="produkBtn">PRODUK</button>
-    </div>
 
-    <!-- Channels -->
-    <nav class="channels" id="channels">
-      <a href="https://wa.me/62881036764627" target="_blank">Kontak Owner</a>
-      <a href="https://whatsapp.com/channel/0029VbB7Ffj5q08l7J5C9B02" target="_blank">Info Channel</a>
-      <a href="https://chat.whatsapp.com/FmUamStYqg62xUHvWsudQ6?mode=wwt" target="_blank">Room Publik</a>
-    </nav>
+<!-- CUSTOM CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- LOADING SCREEN -->
+<div id="loader">
+  <div class="loader-logo">AETHERIA</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+  <div class="loader-pct" id="loaderPct">INITIALIZING... 0%</div>
+</div>
+
+<!-- BG -->
+<div class="bg-grid"></div>
+<canvas id="particles-canvas"></canvas>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a href="#home" class="nav-logo">⬡ <span>Aetheria</span> Official</a>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#script-bot">Script Bot</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="https://wa.me/6285624202395" class="nav-cta" target="_blank">Get Script</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="nav-mobile" id="navMobile">
+  <a href="#home" onclick="closeMobile()">Home</a>
+  <a href="#script-bot" onclick="closeMobile()">Script Bot</a>
+  <a href="#contact" onclick="closeMobile()">Contact</a>
+  <a href="#about" onclick="closeMobile()">About</a>
+  <a href="https://wa.me/6285624202395" target="_blank">Get Script →</a>
+</div>
+
+<!-- HERO -->
+<section id="home">
+  <div class="hero-glow-orb orb-1"></div>
+  <div class="hero-glow-orb orb-2"></div>
+  <div class="hero-glow-orb orb-3"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      ELITE WHATSAPP BOT DEVELOPER
+    </div>
+    <h1 class="hero-title">
+      <span class="line1">Aetheria</span>
+      <span class="line2">Official</span>
+    </h1>
+    <div class="hero-subtitle-wrap">
+      <span class="typing-text" id="typingEl"></span><span class="cursor-blink"></span>
+    </div>
+    <p class="hero-desc">
+      Platform pengembang bot WhatsApp premium dengan teknologi terdepan. Script modern, performa tinggi, desain futuristic untuk era digital masa kini.
+    </p>
+    <div class="hero-btns">
+      <a href="#script-bot" class="btn-primary"><span>⬇ Download Free</span></a>
+      <a href="https://wa.me/6285624202395" target="_blank" class="btn-secondary">💬 Contact Admin</a>
+    </div>
   </div>
 
-  <!-- Produk list -->
-  <div class="products" id="products">
-    <div class="card">
-      <h3>TOP UP MLBB</h3>
-      <ul>
-        <li>belum diatur hehe</li>
-       <ul>           
-      <a class="order-btn" href="https://files.catbox.moe/3uhu1m.jpeg" target="_blank">Order</a>
-      <a class="order-btn" href="https://wa.me/62881036764627" target="_blank">Hubungi</a>
+  <div class="hero-visual">
+    <div class="hologram-panel">
+      <div class="holo-bg">
+        <div class="holo-corner tl"></div>
+        <div class="holo-corner tr"></div>
+        <div class="holo-corner bl"></div>
+        <div class="holo-corner br"></div>
+      </div>
+
+      <div class="holo-title">
+        <div class="holo-title-text">// AETHERIA BOT SYSTEM v2.0</div>
+      </div>
+
+      <div class="bot-icon-main">
+        <div class="wa-icon-large">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="floating-icons">
+        <div class="float-item wa2">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        </div>
+        <div class="float-item tg">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="#29b6f6"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </div>
+        <div class="float-item ai">🤖</div>
+        <div class="float-item circuit">⚡</div>
+        <div class="float-item cube">◆</div>
+      </div>
+
+      <div class="holo-info">
+        <div>
+          <div class="holo-info-label">STATUS</div>
+          <div class="holo-info-val">ONLINE</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <div class="status-dot"></div>
+          <span style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--white-dim);">ACTIVE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="stats-grid">
+    <div class="stat-card reveal" style="animation-delay:0s">
+      <div class="stat-icon">👥</div>
+      <span class="stat-num" data-target="1000">0</span>
+      <div class="stat-label">+ Active Users</div>
+    </div>
+    <div class="stat-card reveal" style="animation-delay:0.1s">
+      <div class="stat-icon">🕐</div>
+      <span class="stat-num">24/7</span>
+      <div class="stat-label">Support Ready</div>
+    </div>
+    <div class="stat-card reveal" style="animation-delay:0.2s">
+      <div class="stat-icon">⚡</div>
+      <span class="stat-num">99%</span>
+      <div class="stat-label">Fast Performance</div>
+    </div>
+    <div class="stat-card reveal" style="animation-delay:0.3s">
+      <div class="stat-icon">🔒</div>
+      <span class="stat-num" data-target="100">0</span>
+      <div class="stat-label">% Trusted Service</div>
+    </div>
+  </div>
+</section>
+
+<!-- SCRIPT BOT -->
+<section id="script-bot">
+  <div class="section-header reveal">
+    <div class="section-tag">// FREE DOWNLOAD</div>
+    <h2 class="section-title">Script Bot Gratis</h2>
+    <p class="section-desc">Download script WhatsApp bot berkualitas tinggi secara <span style="color:var(--purple-bright);font-weight:700;">GRATIS</span> via Mediafire. Tidak perlu bayar, langsung download!</p>
+  </div>
+
+  <div class="free-notice reveal">
+    <div class="free-notice-inner">
+      <span class="free-badge-icon">🎁</span>
+      <div>
+        <div class="free-notice-title">100% FREE — No Hidden Cost</div>
+        <div class="free-notice-sub">Semua script tersedia gratis. Klik tombol Download untuk langsung mengunduh via Mediafire.</div>
+      </div>
+      <div class="free-pill">FREE</div>
+    </div>
+  </div>
+
+  <div class="scripts-grid">
+
+    <!-- CARD 1 -->
+    <div class="script-card featured reveal" style="animation-delay:0s">
+      <span class="card-badge badge-hot">🔥 HOT</span>
+      <div class="card-icon icon-wa">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      </div>
+      <div class="card-title">Aetheria tes bot</div>
+      <div class="card-version">
+        <span class="ver-tag">v2.0.1</span>
+        <span class="ver-size">📦 12.4 MB</span>
+        <span class="ver-type">Node.js</span>
+      </div>
+      <div class="card-desc">Script WhatsApp bot premium dengan fitur lengkap, multi device, dan sistem plugin yang powerful untuk kebutuhan bisnis dan personal.</div>
+      <div class="card-features">
+        <div class="feature-item">Multi Device</div>
+        <div class="feature-item">Plugins System</div>
+        <div class="feature-item">Pairing Code</div>
+        <div class="feature-item">Anti Delay</div>
+        <div class="feature-item">Fast Response</div>
+        <div class="feature-item">Free Update</div>
+      </div>
+      <div class="dl-meta">
+        <span class="dl-count">⬇ 3.2k downloads</span>
+        <span class="dl-host">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+          Mediafire
+        </span>
+      </div>
+      <a href="https://www.mediafire.com/file/4vdmxe57rvc3o44/bot_fixed_v4.zip/file" target="_blank" class="btn-dl-main" onclick="triggerDownload(this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Download Gratis</span>
+        <span class="btn-dl-pill">FREE</span>
+      </a>
     </div>
 
-    <div class="card"> 
-      <h3>TOP UP FREE FIRE</h3>
-      <ul>
-        <li>belum diatur hehe</li>
-       <ul>           
-      <a class="order-btn" href="https://files.catbox.moe/3uhu1m.jpeg" target="_blank">Order</a>
-      <a class="order-btn" href="https://wa.me/62881036764627" target="_blank">Hubungi</a>
+    <!-- CARD 2 -->
+    <div class="script-card reveal" style="animation-delay:0.15s">
+      <span class="card-badge badge-new">✨ NEW</span>
+      <div class="card-icon icon-ai">🤖</div>
+      <div class="card-title">Aetheria AI Bot</div>
+      <div class="card-version">
+        <span class="ver-tag">v1.5.0</span>
+        <span class="ver-size">📦 8.7 MB</span>
+        <span class="ver-type">Node.js</span>
+      </div>
+      <div class="card-desc">Bot WhatsApp bertenaga AI dengan kemampuan conversation cerdas, auto reply, dan integrasi ChatGPT untuk pengalaman next-level.</div>
+      <div class="card-features">
+        <div class="feature-item">AI Powered</div>
+        <div class="feature-item">ChatGPT Integration</div>
+        <div class="feature-item">Auto Reply</div>
+        <div class="feature-item">Smart Command</div>
+        <div class="feature-item">Multi Session</div>
+        <div class="feature-item">Free Update</div>
+      </div>
+      <div class="dl-meta">
+        <span class="dl-count">⬇ 1.8k downloads</span>
+        <span class="dl-host">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+          Mediafire
+        </span>
+      </div>
+      <a href="https://www.mediafire.com/" target="_blank" class="btn-dl-main" onclick="triggerDownload(this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Download Gratis</span>
+        <span class="btn-dl-pill">FREE</span>
+      </a>
     </div>
 
-    <div class="card"> 
-      <h3>TOP UP ROBUX</h3> 
-      <ul> 
-        <li>belum diatur hehe</li>
-      </ul>
-      <a class="order-btn" href="https://files.catbox.moe/3uhu1m.jpeg" target="_blank">Order</a>
-      <a class="order-btn" href="https://wa.me/62881036764627" target="_blank">Hubungi</a>
+    <!-- CARD 3 -->
+    <div class="script-card reveal" style="animation-delay:0.3s">
+      <span class="card-badge badge-pro">⭐ PRO</span>
+      <div class="card-icon icon-cyber">⚡</div>
+      <div class="card-title">Aetheria Cyber Pro</div>
+      <div class="card-version">
+        <span class="ver-tag">v3.1.2</span>
+        <span class="ver-size">📦 15.2 MB</span>
+        <span class="ver-type">Node.js</span>
+      </div>
+      <div class="card-desc">Script bot premium edisi Cyber Pro dengan fitur anti-ban terbaru, sistem keamanan berlapis, dan performa ultra-cepat.</div>
+      <div class="card-features">
+        <div class="feature-item">Anti Ban</div>
+        <div class="feature-item">Security Layer</div>
+        <div class="feature-item">Ultra Speed</div>
+        <div class="feature-item">Auto Reconnect</div>
+        <div class="feature-item">Custom UI</div>
+        <div class="feature-item">24/7 Support</div>
+      </div>
+      <div class="dl-meta">
+        <span class="dl-count">⬇ 4.1k downloads</span>
+        <span class="dl-host">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+          Mediafire
+        </span>
+      </div>
+      <a href="https://www.mediafire.com/" target="_blank" class="btn-dl-main" onclick="triggerDownload(this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Download Gratis</span>
+        <span class="btn-dl-pill">FREE</span>
+      </a>
     </div>
 
-    <div class="card"> 
-      <h3>JUAL AKUN</h3> 
-      <ul> 
-        <li>LANGSUNG HUBUNNGI</li> 
-      </ul> 
-      <a class="order-btn" href="https://files.catbox.moe/3uhu1m.jpeg" target="_blank">Order</a> 
-      <a class="order-btn" href="https://wa.me/62881036764627" target="_blank">Hubungi</a> 
-    </div> 
-    <div class="card"> 
-      <h3>BELI AKUN</h3> 
-      <ul> 
-        <li>LANGSUNG HUBUNGI</li> 
+  </div>
+
+  <!-- HOW TO DOWNLOAD -->
+  <div class="howto-wrap reveal">
+    <div class="howto-title">
+      <span style="color:var(--purple-bright)">📖</span> Cara Download
+    </div>
+    <div class="howto-steps">
+      <div class="howto-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Klik tombol <strong>Download Gratis</strong> pada script yang diinginkan</div>
+      </div>
+      <div class="howto-arrow">→</div>
+      <div class="howto-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Halaman <strong>Mediafire</strong> akan terbuka secara otomatis</div>
+      </div>
+      <div class="howto-arrow">→</div>
+      <div class="howto-step">
+        <div class="step-num">3</div>
+        <div class="step-text">Klik tombol <strong>Download</strong> di halaman Mediafire</div>
+      </div>
+      <div class="howto-arrow">→</div>
+      <div class="howto-step">
+        <div class="step-num">4</div>
+        <div class="step-text">File ter-download! Ekstrak & ikuti panduan <strong>README.md</strong></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-header reveal">
+    <div class="section-tag">// CONTACT</div>
+    <h2 class="section-title">Hubungi Kami</h2>
+    <p class="section-desc">Siap melayani 24/7. Hubungi kami melalui WhatsApp atau Telegram untuk info lebih lanjut.</p>
+  </div>
+
+  <div class="contact-wrapper">
+    <div class="contact-cards">
+      <div class="contact-card reveal" style="animation-delay:0s">
+        <span class="contact-icon" style="color:#25D366">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        </span>
+        <div class="contact-name">WhatsApp</div>
+        <div class="contact-handle">+62 856-2420-2395</div>
+        <a href="https://wa.me/6285624202395" target="_blank" class="btn-contact-wa">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Chat WhatsApp
+        </a>
+      </div>
+
+      <div class="contact-card reveal" style="animation-delay:0.15s">
+        <span class="contact-icon" style="color:#29b6f6">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="#29b6f6"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </span>
+        <div class="contact-name">Telegram</div>
+        <div class="contact-handle">@aetheriashopp</div>
+        <a href="https://t.me/aetheriashopp" target="_blank" class="btn-contact-tg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          Open Telegram
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-inner">
+    <div class="about-text reveal">
+      <div class="section-tag">// ABOUT US</div>
+      <h2 class="about-title">Elite <span>WhatsApp Bot</span> Developer</h2>
+      <p class="about-desc">
+        Aetheria Official menyediakan script bot WhatsApp modern dengan fitur lengkap, performa stabil, dan desain premium untuk kebutuhan digital masa kini. Kami hadir sebagai solusi terpercaya bagi individu dan bisnis yang membutuhkan automasi komunikasi berkualitas tinggi.
+      </p>
+      <div class="about-tags">
+        <span class="tag-item">⚡ Fast Performance</span>
+        <span class="tag-item">🔒 Secure</span>
+        <span class="tag-item">🤖 AI Powered</span>
+        <span class="tag-item">🔄 Free Update</span>
+        <span class="tag-item">💎 Premium Quality</span>
+        <span class="tag-item">🌐 24/7 Support</span>
+      </div>
+    </div>
+    <div class="about-visual reveal">
+      <div class="about-box">
+        <div class="about-box-inner">
+          <div class="about-icon">⬡</div>
+          <div class="about-label">AETHERIA<br>OFFICIAL</div>
+          <div style="font-family:'Space Mono',monospace;font-size:0.55rem;color:var(--white-dim);letter-spacing:0.15em;margin-top:0.25rem;">EST. 2024</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">⬡ <span>Aetheria</span> Official</div>
+    <div class="footer-social">
+      <a href="https://wa.me/6285624202395" target="_blank" class="social-btn" title="WhatsApp">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      </a>
+      <a href="https://t.me/aetheriashopp" target="_blank" class="social-btn" title="Telegram" style="color:#29b6f6;border-color:rgba(41,182,246,0.25);background:rgba(41,182,246,0.08);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+      </a>
+    </div>
+    <div class="footer-copy">
+      Copyright © 2025 <span>Aetheria Official</span>. All rights reserved. Built with 💜 for the future.
+    </div>
+  </div>
+</footer>
+
+<script>
+// LOADER
+let pct = 0;
+const loaderPct = document.getElementById('loaderPct');
+const loaderInterval = setInterval(() => {
+  pct = Math.min(pct + Math.random() * 15, 100);
+  loaderPct.textContent = `INITIALIZING... ${Math.floor(pct)}%`;
+  if (pct >= 100) {
+    clearInterval(loaderInterval);
+    setTimeout(() => {
+      document.getElementById('loader').classList.add('hidden');
+    }, 300);
+  }
+}, 100);
+
+// CUSTOM CURSOR
+const cursor = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+function animCursor() {
+  cursor.style.transform = `translate(${mx - 6}px, ${my - 6}px)`;
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  cursorRing.style.transform = `translate(${rx - 18}px, ${ry - 18}px)`;
+  requestAnimationFrame(animCursor);
+}
+animCursor();
+document.querySelectorAll('a, button, .script-card, .stat-card').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursorRing.style.width = '60px'; cursorRing.style.height = '60px'; cursorRing.style.marginLeft = '-12px'; cursorRing.style.marginTop = '-12px'; });
+  el.addEventListener('mouseleave', () => { cursorRing.style.width = '36px'; cursorRing.style.height = '36px'; cursorRing.style.marginLeft = '0'; cursorRing.style.marginTop = '0'; });
+});
+
+// TYPING ANIMATION
+const phrases = [
+  'Modern WhatsApp Bot Developer',
+  'Digital Services & Automation',
+  'Premium Script Provider',
+  'Futuristic Cyber Solutions',
+];
+let pi = 0, ci = 0, deleting = false, waiting = false;
+const typingEl = document.getElementById('typingEl');
+function typeLoop() {
+  const phrase = phrases[pi];
+  if (waiting) { waiting = false; setTimeout(typeLoop, 1200); return; }
+  if (!deleting) {
+    typingEl.textContent = phrase.slice(0, ci + 1);
+    ci++;
+    if (ci === phrase.length) { deleting = true; waiting = true; setTimeout(typeLoop, 60); return; }
+  } else {
+    typingEl.textContent = phrase.slice(0, ci - 1);
+    ci--;
+    if (ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; }
+  }
+  setTimeout(typeLoop, deleting ? 40 : 80);
+}
+typeLoop();
+
+// NAVBAR SCROLL
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// HAMBURGER
+const hamburger = document.getElementById('hamburger');
+const navMobile = document.getElementById('navMobile');
+hamburger.addEventListener('click', () => navMobile.classList.toggle('open'));
+function closeMobile() { navMobile.classList.remove('open'); }
+
+// PARTICLES
+const canvas = document.getElementById('particles-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.size = Math.random() * 1.5 + 0.3;
+    this.speedX = (Math.random() - 0.5) * 0.4;
+    this.speedY = (Math.random() - 0.5) * 0.4;
+    this.opacity = Math.random() * 0.5 + 0.1;
+    this.color = Math.random() > 0.5 ? '168,85,247' : Math.random() > 0.5 ? '56,189,248' : '217,70,239';
+    this.pulse = Math.random() * Math.PI * 2;
+    this.pulseSpeed = (Math.random() * 0.02 + 0.005);
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.pulse += this.pulseSpeed;
+    if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
+  }
+  draw() {
+    const o = this.opacity * (0.6 + 0.4 * Math.sin(this.pulse));
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${this.color},${o})`;
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < 120; i++) particles.push(new Particle());
+
+// Draw connections
+function drawConnections() {
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 100) {
+        const o = (1 - dist / 100) * 0.08;
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(168,85,247,${o})`;
+        ctx.lineWidth = 0.5;
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function animParticles() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => { p.update(); p.draw(); });
+  drawConnections();
+  requestAnimationFrame(animParticles);
+}
+animParticles();
+
+// SCROLL REVEAL
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      entry.target.style.transitionDelay = `${i * 0.05}s`;
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+reveals.forEach(el => observer.observe(el));
+
+// COUNTER ANIMATION
+function animateCounter(el, target) {
+  let start = 0;
+  const duration = 1500;
+  const step = timestamp => {
+    if (!start) start = timestamp;
+    const progress = Math.min((timestamp - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.floor(ease * target) + (target === 1000 ? '+' : '%');
+    if (progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const target = parseInt(entry.target.dataset.target);
+      animateCounter(entry.target, target);
+      counterObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('[data-target]').forEach(el => counterObserver.observe(el));
+
+// DOWNLOAD BUTTON ANIMATION
+function triggerDownload(el) {
+  const originalHTML = el.innerHTML;
+  el.classList.add('downloading');
+  el.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 0.8s linear infinite"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg><span>Menghubungkan ke Mediafire...</span>`;
+  setTimeout(() => {
+    el.classList.remove('downloading');
+    el.classList.add('done');
+    el.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Membuka Mediafire...</span>`;
+    setTimeout(() => {
+      el.classList.remove('done');
+      el.innerHTML = originalHTML;
+    }, 2500);
+  }, 1200);
+}
+
+// Add spin keyframe dynamically
+const style = document.createElement('style');
+style.textContent = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+document.head.appendChild(style);
+
+// SMOOTH SCROLL
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>
       </ul> 
       <a class="order-btn" href="https://files.catbox.moe/3uhu1m.jpeg" target="_blank">Order</a> 
       <a class="order-btn" href="https://wa.me/62881036764627" target="_blank">Hubungi</a> 
